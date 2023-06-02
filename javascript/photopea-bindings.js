@@ -7,35 +7,37 @@ function onPhotopeaLoaded(iframe) {
     console.log("Photopea iFrame loaded");
     photopeaWindow = iframe.contentWindow;
     photopeaIframe = iframe;
-
-    // Clone some buttons to send the contents of galleries in txt2img, img2img and extras tabs
-    // to Photopea. You can also just copy-paste the images directly but these are the ones I
-    // use the most.
     createSendToPhotopeaButton("image_buttons_txt2img", txt2img_gallery);
     createSendToPhotopeaButton("image_buttons_img2img", img2img_gallery);
     createSendToPhotopeaButton("image_buttons_extras", extras_gallery);
 
-    // Listen to the size slider changes.
-    gradioApp().getElementById("photopeaIframeSlider").addEventListener('input', (event) => {
-        // Get the value of the slider and parse it as an integer
-        const newHeight = parseInt(event.target.value);
-
-        // Update the height of the iframe
-        photopeaIframe.style.height = newHeight + 'px';
-    });
 }
 
 // Creates a button in one of the WebUI galleries that will get the currently selected image in the 
 // gallery.
 // `queryId`: the id for the querySelector to search for the specific gallery list of buttons.
 // `gallery`: the gallery div itself (cached by WebUI).
-function createSendToPhotopeaButton(queryId, gallery) {
-    const existingButton = gradioApp().querySelector(`#${queryId} button`);
-    const newButton = existingButton.cloneNode(true);
-    newButton.id = `${queryId}_open_in_photopea`;
+function createSendToPhotopeaButton(gallery) {
+  const buttonIds = [
+    "txt2img",
+    "img2img",
+    "extras"
+  ];
+  buttonIds.forEach(function(id) {
+    const existingButton = gradioApp().getElementById(`image_buttons_${id}_open_in_photopea`);
+    if (existingButton) return;
+    const newButton = document.createElement("button");
+    newButton.id = `image_buttons_${id}_open_in_photopea`;
     newButton.textContent = "редактировать";
+    const siblingButton = gradioApp().querySelector(`#image_buttons_${id} button`);
+    if (siblingButton) {
+      siblingButton.classList.forEach(function(className) {
+        newButton.classList.add(className);
+      });
+    }
     newButton.addEventListener("click", () => openImageInPhotopea(gallery));
-    gradioApp().querySelector(`#${queryId}`).appendChild(newButton);
+    gradioApp().querySelector(`#image_buttons_${id}`).appendChild(newButton);
+  });
 }
 
 // Switches to the "Photopea" tab by finding and clicking on the DOM button.
