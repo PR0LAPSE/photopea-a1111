@@ -33,7 +33,7 @@ function createSendToPhotopeaButton(queryId, gallery) {
     const existingButton = gradioApp().querySelector(`#${queryId} button`);
     const newButton = existingButton.cloneNode(true);
     newButton.id = `${queryId}_open_in_photopea`;
-    newButton.textContent = "Send to Photopea";
+    newButton.textContent = "редактировать";
     newButton.addEventListener("click", () => openImageInPhotopea(gallery));
     gradioApp().querySelector(`#${queryId}`).appendChild(newButton);
 }
@@ -45,7 +45,7 @@ function goToPhotopeaTab() {
     // The space after the name seems to be added automatically for some reason, so this is likely
     // flaky across versions. We can't use "contains" because there's also "Send to Photopea"
     // buttons.
-    photopeaTabButton = Array.from(allButtons).find(button => button.textContent === 'Photopea ');
+    photopeaTabButton = Array.from(allButtons).find(button => button.textContent === 'редактор ');
     photopeaTabButton.click();
 }
 
@@ -60,7 +60,7 @@ function goToImg2ImgInpaintUpload(onFinished) {
     waitForWebUiUpdate(img2imgdiv).then(() => {
         const allButtons = img2imgdiv.querySelectorAll("div.tab-nav > button");
         const inpaintButton =
-            Array.from(allButtons).find(button => button.textContent === 'Inpaint upload ');
+            Array.from(allButtons).find(button => button.textContent === 'по загруженой маске ');
         inpaintButton.click();
         onFinished();
     });
@@ -174,7 +174,7 @@ function sendImageWithMaskSelectionToWebUi() {
             if (response[0] === false) {
                 // In case there isn't, do an in-photopea alert (which is less intrusive but more
                 // visible).
-                postMessageToPhotopea(`alert("No selection in active document!");`);
+                postMessageToPhotopea(`alert("Нет выделения в активном документе!");`);
             } else {
                 // Let's start by swapping to the correct tab. This is a bit more involved due to
                 // Gradio's reconstruction of disabled UI elements.

@@ -4,9 +4,8 @@ from modules.shared import opts
 from modules import extensions
 
 # Handy constants
-PHOTOPEA_MAIN_URL = "https://www.photopea.com/"
+PHOTOPEA_MAIN_URL = "https://photopea.com/?p={%22environment%22:{%22fcolor%22:%220xFFFFFF%22,%22bcolor%22:%220x000000%22,%22theme%22:2,%22lang%22:%22ru%22,%22intro%22:false,%22menus%22:[[1,1,1,[0,1,1,1],0,1,1,0,1,1,1,0,1,1,0],1,1,1,1,1,1,1,[0,0,0,1,1]]}}"
 PHOTOPEA_IFRAME_ID = "webui-photopea-iframe"
-PHOTOPEA_IFRAME_HEIGHT = 768
 PHOTOPEA_IFRAME_WIDTH = "100%"
 PHOTOPEA_IFRAME_LOADED_EVENT = "onPhotopeaLoaded"
 
@@ -20,20 +19,23 @@ def on_ui_tabs():
             if "controlnet" in extension.name:
                 controlnet_exists = True
                 break
-
+        with gr.Row():
+            gr.HTML(
+                """<div id="ph_overlay"></div>"""
+                """<div id="ph_hidead"></div>"""
+            )
         with gr.Row():
             # Add an iframe with Photopea directly in the tab.
             gr.HTML(
                 f"""<iframe id="{PHOTOPEA_IFRAME_ID}" 
                 src = "{PHOTOPEA_MAIN_URL}{get_photopea_url_params()}" 
                 width = "{PHOTOPEA_IFRAME_WIDTH}" 
-                height = "{PHOTOPEA_IFRAME_HEIGHT}"
                 onload = "{PHOTOPEA_IFRAME_LOADED_EVENT}(this)">"""
             )
         with gr.Row():
             gr.Checkbox(
-                label="Active Layer Only",
-                info="If true, instead of sending the flattened image, will send just the currently selected layer.",
+                label="только активный слой",
+                info="отправить только текущий слой, а не все композитное изображение",
                 elem_id="photopea-use-active-layer-only",
             )
             # Controlnet might have more than one model tab (set by the 'control_net_max_models_num' setting).
@@ -44,46 +46,34 @@ def on_ui_tabs():
 
             select_target_index = gr.Dropdown(
                 [str(i) for i in range(num_controlnet_models)],
-                label="ControlNet model index",
+                label="модели ControlNet",
                 value="0",
                 interactive=True,
                 visible=num_controlnet_models > 1,
             )
 
-            # Just create the size slider here. We'll modify the page via the js bindings.
-            gr.Slider(
-                minimum=512,
-                maximum=2160,
-                value=768,
-                step=10,
-                label="iFrame height",
-                interactive=True,
-                elem_id="photopeaIframeSlider",
-            )
+           
 
         with gr.Row():
             with gr.Column():
                 gr.HTML(
-                    """<b>Controlnet extension not found!</b> Either <a href="https://github.com/Mikubill/sd-webui-controlnet" target="_blank">install it</a>, or activate it under Settings.""",
+                    """<b>дополнение Controlnet не установлено.</b>""",
                     visible=not controlnet_exists,
                 )
                 send_t2i_cn = gr.Button(
-                    value="Send to txt2img ControlNet", visible=controlnet_exists
+                    value="отправить в текст-в-изо ControlNet", visible=controlnet_exists
                 )
-                send_extras = gr.Button(value="Send to Extras")
+                send_extras = gr.Button(value="отправить в апскейл/исправление лиц")
 
             with gr.Column():
-                send_i2i = gr.Button(value="Send to img2img")
+                send_i2i = gr.Button(value="отправить в изо-в-изо")
                 send_i2i_cn = gr.Button(
-                    value="Send to img2img ControlNet", visible=controlnet_exists
+                    value="отправить в изо-в-изо ControlNet", visible=controlnet_exists
                 )
             with gr.Column():
-                send_selection_inpaint = gr.Button(value="Inpaint selection")
+                send_selection_inpaint = gr.Button(value="зарисовать выделеное")
 
-        with gr.Row():
-            gr.HTML(
-                """<font size="small"><p align="right">Consider supporting Photopea by <a href="https://www.photopea.com/api/accounts" target="_blank">going Premium</a>!</font></p>"""
-            )
+
         # The getAndSendImageToWebUITab in photopea-bindings.js takes the following parameters:
         #  webUiTab: the name of the tab. Used to find the gallery via DOM queries.
         #  sendToControlnet: if true, tries to send it to a specific ControlNet widget, otherwise, sends to the native WebUI widget.
@@ -114,7 +104,7 @@ def on_ui_tabs():
         )
         send_selection_inpaint.click(fn=None, _js="sendImageWithMaskSelectionToWebUi")
 
-    return [(photopea_tab, "Photopea", "photopea_embed")]
+    return [(photopea_tab, "редактор", "photopea_embed")]
 
 
 # Initialize Photopea with an empty, 512x512 white image. It's baked as a base64 string with URI encoding.
