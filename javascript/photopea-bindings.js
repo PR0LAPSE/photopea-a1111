@@ -3,6 +3,7 @@ var photopeaWindow = null;
 var photopeaIframe = null;
 
 // Called by the iframe set up on photopea-tab.py.
+let createdButtons = {};
 function onPhotopeaLoaded(iframe) {
     console.log("Photopea iFrame loaded");
     photopeaWindow = iframe.contentWindow;
@@ -10,35 +11,19 @@ function onPhotopeaLoaded(iframe) {
     createSendToPhotopeaButton("image_buttons_txt2img", txt2img_gallery);
     createSendToPhotopeaButton("image_buttons_img2img", img2img_gallery);
     createSendToPhotopeaButton("image_buttons_extras", extras_gallery);
-
 }
-
-// Creates a button in one of the WebUI galleries that will get the currently selected image in the 
-// gallery.
-// `queryId`: the id for the querySelector to search for the specific gallery list of buttons.
-// `gallery`: the gallery div itself (cached by WebUI).
-function createSendToPhotopeaButton(gallery) {
-  const buttonIds = [
-    "txt2img",
-    "img2img",
-    "extras"
-  ];
-  buttonIds.forEach(function(id) {
-    const existingButton = gradioApp().getElementById(`image_buttons_${id}_open_in_photopea`);
-    if (existingButton) return;
-    const newButton = document.createElement("button");
-    newButton.id = `image_buttons_${id}_open_in_photopea`;
-    newButton.textContent = "редактировать";
-    const siblingButton = gradioApp().querySelector(`#image_buttons_${id} button`);
-    if (siblingButton) {
-      siblingButton.classList.forEach(function(className) {
-        newButton.classList.add(className);
-      });
+function createSendToPhotopeaButton(queryId, gallery) {
+    if (createdButtons[queryId]) {
+        return;
     }
+    const existingButton = gradioApp().querySelector(`#${queryId} button`);
+    const newButton = existingButton.cloneNode(true);
+    newButton.id = `${queryId}_open_in_photopea`;
+    newButton.textContent = "редактировать";
     newButton.addEventListener("click", () => openImageInPhotopea(gallery));
-    gradioApp().querySelector(`#image_buttons_${id}`).appendChild(newButton);
-  });
-}
+    gradioApp().querySelector(`#${queryId}`).appendChild(newButton);
+    createdButtons[queryId] = true;
+} 
 
 // Switches to the "Photopea" tab by finding and clicking on the DOM button.
 function goToPhotopeaTab() {
