@@ -21,7 +21,7 @@ def on_ui_tabs():
                 break
         with gr.Row():
             gr.HTML(
-                """<div id="ph_overlay"></div>"""
+                """<div id="ph_overlay"><div id="reload_frame" onclick="reloadIframe()">перезагрузить фрейм, если панели слоев не отображаются</div></div>"""
                 """<div id="ph_hidead"></div>"""
             )
         with gr.Row():

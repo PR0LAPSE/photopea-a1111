@@ -1,4 +1,7 @@
+function reloadIframe() {
+    const iframe = document.getElementById("webui-photopea-iframe");
+    iframe.src = iframe.src;
+}
 setTimeout(() => {
-        var photopea_iframe = document.getElementById("webui-photopea-iframe");
-		photopea_iframe.src = photopea_iframe.src;
+        reloadIframe();
 }, 10000);
